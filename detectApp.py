@@ -15,7 +15,7 @@ from PyQt5.QtCore import QTimer
  
 import cv2
 import sys
-from mainTest import *
+from detectCore import *
 
 
 
@@ -33,7 +33,7 @@ def pixmap_from_cv_image(cv_image):
     return QPixmap(qImg)
 
 def resize_image(image_data, max_img_width, max_img_height):
-    scale_percent = min(max_img_width / image_data.shape[1], max_img_height / image_data.shape[0])
+    scale_percent = max(max_img_width / image_data.shape[1], max_img_height / image_data.shape[0])
     width = int(image_data.shape[1] * scale_percent)
     height = int(image_data.shape[0] * scale_percent)
     newSize = (width, height)
@@ -76,25 +76,34 @@ class Ui_MainWindow(object):
 
 
         self.textBrowser = QtWidgets.QTextBrowser(self.centralwidget)
-        self.textBrowser.setGeometry(QtCore.QRect(850, 80, 371, 731))
+        # self.textBrowser.setGeometry(QtCore.QRect(850, 80, 371, 731))
+        self.textBrowser.setGeometry(QtCore.QRect(20, 710, 1241, 131))
+
         self.textBrowser.setObjectName("textBrowser")
         self.textBrowser.setWordWrapMode(True)
-        self.splitter_2 = QtWidgets.QSplitter(self.centralwidget)
-        self.splitter_2.setGeometry(QtCore.QRect(30, 80, 781, 751))
-        self.splitter_2.setOrientation(QtCore.Qt.Vertical)
-        self.splitter_2.setObjectName("splitter_2")
-        self.splitter = QtWidgets.QSplitter(self.splitter_2)
+
+        # self.splitter_2 = QtWidgets.QSplitter(self.centralwidget)
+        # self.splitter_2.setGeometry(QtCore.QRect(30, 80, 781, 751))
+        # self.splitter_2.setOrientation(QtCore.Qt.Vertical)
+        # self.splitter_2.setObjectName("splitter_2")
+        # self.splitter = QtWidgets.QSplitter(self.splitter_2)
+        # self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        # self.splitter.setObjectName("splitter")
+        self.splitter = QtWidgets.QSplitter(self.centralwidget)
+        self.splitter.setGeometry(QtCore.QRect(40, 70, 1211, 551))
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("splitter")
+
         self.srcImg = QtWidgets.QLabel(self.splitter)
         self.srcImg.setText("")
-        # self.srcImg.setPixmap(QtGui.QPixmap("/home/nancy/Desktop/myWorkspace/error/1.jpg"))
-        # self.srcImg.setScaledContents(True)
         self.srcImg.setObjectName("srcImg")
         self.rstImg = QtWidgets.QLabel(self.splitter)
         self.rstImg.setText("")
         self.rstImg.setObjectName("rstImg")
-        self.horizontalSlider = QtWidgets.QSlider(self.splitter_2)
+
+        # self.horizontalSlider = QtWidgets.QSlider(self.splitter_2)
+        self.horizontalSlider = QtWidgets.QSlider(self.centralwidget)
+        self.horizontalSlider.setGeometry(QtCore.QRect(40, 660, 1211, 16))
         self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalSlider.setObjectName("horizontalSlider")
         MainWindow.setCentralWidget(self.centralwidget)
@@ -114,9 +123,9 @@ class Ui_MainWindow(object):
         self.openBtn.clicked.connect(self.loadImage) # type: ignore
         self.processBtn.clicked.connect(self.setPhoto) # type: ignore
 
-        # self.playVidbtn.clicked.connect(self.start_timer) # type: ignore
-        # self.timer.timeout.connect(self.playVideo)
-        self.playVidbtn.clicked.connect(self.playVideo) # type: ignore
+        self.playVidbtn.clicked.connect(self.start_timer) # type: ignore
+        self.timer.timeout.connect(self.playVideo)
+        # self.playVidbtn.clicked.connect(self.playVideo) # type: ignore
 
         self.textBrowser.setText("None")
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -173,9 +182,10 @@ class Ui_MainWindow(object):
         self.nuts_lose += 0 if rst[4] else 1
         self.insulate_lose += 0 if rst[2] else 1
         self.insulate_lose += 0 if rst[5] else 1
+        d = {True:"OK",False:"Lose"}
 
-        self.textBrowser.setText("left_string: {} \t right_string: {}\nleft_nut: {}\t right_nut: {}\nleft_insulate:{} \t right_insulate:{} \nfps:{}\n\n\
-            processed pic:{}\ntotal_string_lose:{}\ntotal_nuts_lose:{}\ntotal_insulate_lose:{}".format(rst[0], rst[3], rst[1],rst[4], rst[2], rst[5], fps,self.fps, self.strings_lose, self.nuts_lose, self.insulate_lose))
+        self.textBrowser.setText("left_string: {} \t right_string: {}\nleft_nut: {}\t right_nut: {}\nleft_insulate:{} \t right_insulate:{} \nfps:{}\
+            \n\nprocessed pic:{}\ntotal_string_lose:{}\ttotal_nuts_lose:{}\ttotal_insulate_lose:{}".format(d[rst[0]], d[rst[3]], d[rst[1]],d[rst[4]], d[rst[2]], d[rst[5]], fps,self.fps+1, self.strings_lose, self.nuts_lose, self.insulate_lose))
 
 
 
@@ -186,29 +196,28 @@ class Ui_MainWindow(object):
             print("No frame")
 
     def playVideo(self):
-        self.filename = QFileDialog.getOpenFileName()[0]
-        self.cap = cv2.VideoCapture(self.filename)
-        self.frames_num = self.cap.get(7)
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES,self.fps)
-        
-        ret, self.src_img = self.cap.read()
-        resized_img = resize_image(self.src_img, self.max_img_width, self.max_img_height)
-        self.srcImg.setPixmap(pixmap_from_cv_image(resized_img))
-        self.update()
-
-        
-
-        # if self.fps >= self.frames_num:
-        #     return
+        # self.filename = QFileDialog.getOpenFileName()[0]
+        # self.cap = cv2.VideoCapture(self.filename)
+        # self.frames_num = self.cap.get(7)
         # self.cap.set(cv2.CAP_PROP_POS_FRAMES,self.fps)
         
         # ret, self.src_img = self.cap.read()
-        # print("ret", ret)
-        # if ret:
-        #     resized_img = resize_image(self.src_img, self.max_img_width, self.max_img_height)
-        #     self.srcImg.setPixmap(pixmap_from_cv_image(resized_img))
-        #     self.fps += 1
-        #     self.update()
+        # resized_img = resize_image(self.src_img, self.max_img_width, self.max_img_height)
+        # self.srcImg.setPixmap(pixmap_from_cv_image(resized_img))
+        # self.update()
+
+        
+
+        if self.fps >= self.frames_num:
+            return
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES,self.fps)
+        
+        ret, self.src_img = self.cap.read()
+        if ret:
+            resized_img = resize_image(self.src_img, self.max_img_width, self.max_img_height)
+            self.srcImg.setPixmap(pixmap_from_cv_image(resized_img))
+            self.fps += 1
+            self.update()
 
 
     def update(self):
@@ -219,7 +228,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "fastern-detect"))
         self.playVidbtn.setText(_translate("MainWindow", "PlayVideo"))
         self.openBtn.setText(_translate("MainWindow", "OpenPic"))
         self.processBtn.setText(_translate("MainWindow", "Process"))

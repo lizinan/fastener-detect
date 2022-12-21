@@ -10,9 +10,9 @@ OpenCV 4.2.0.34
 
 
 ## Code structure
-- ImgProc.py: contains various image process method, such as colorspace tracking, hough line detection and so on.
+- imgProc.py: contains various image process method, such as colorspace tracking, hough line detection and so on.
 - pic2vid.py: transform pictures to video
-- mainTest.py: process Yolo's bounding boxes and detect insulate
+- detectCore.py: process Yolo's bounding boxes and detect insulate
 - detectApp.py: UI window based on pyqt5
 
 ## Demo:
